@@ -1,3 +1,9 @@
+// Copyright 2019 Google LLC
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
+
 import 'package:path/path.dart' as p;
 
 import 'package:sass_api/sass_api.dart';
