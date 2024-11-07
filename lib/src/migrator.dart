@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import 'package:sass_api/sass_api.dart';
 import 'package:source_span/source_span.dart';
 
+import 'aliased_importer.dart';
 import 'exception.dart';
 import 'io.dart';
 import 'util/node_modules_importer.dart';
@@ -68,9 +69,9 @@ abstract class Migrator extends Command<Map<Uri, String>> {
   Map<Uri, String> run() {
     var allMigrated = <Uri, String>{};
     var importer = FilesystemImporter('.');
+
     var importCache = ImportCache(
-        importers: [NodeModulesImporter()],
-        loadPaths: globalResults!['load-path']);
+        importers: _getImporters(), loadPaths: globalResults!['load-path']);
 
     var entrypoints = [
       for (var argument in argResults!.rest)
@@ -124,5 +125,30 @@ abstract class Migrator extends Command<Map<Uri, String>> {
             '@${p.prettyUri(context.sourceUrl)}:${context.start.line + 1}');
       });
     }
+  }
+
+  List<Importer> _getImporters() {
+    var baseDirectory = p.current;
+
+    var importers = <Importer>[
+      NodeModulesImporter(baseDirectory),
+    ];
+
+    var aliasesString = globalResults!['aliases'];
+    if (aliasesString != null && aliasesString is String) {
+      try {
+        var aliasStrings =
+            aliasesString.split(';').where((string) => string.length != 0);
+        var aliases = Map.fromEntries(aliasStrings.map((string) {
+          var parts = string.split(':');
+          return MapEntry(parts[0], parts[1]);
+        }));
+        importers.add(AliasedImporter(baseDirectory, aliases));
+      } catch (e) {
+        throw MigrationException('Error parsing aliases: ${e}');
+      }
+    }
+
+    return importers;
   }
 }

@@ -234,3 +234,12 @@ bool isImportOnlyFile(Uri url) =>
 
   return (fs, gs);
 }
+
+/// Replaces the last [from] entry with [to] in [string].
+String replaceLast(String string, String from, String to) {
+  int lastIndex = string.lastIndexOf(from);
+  if (lastIndex == -1) {
+    return string;
+  }
+  return string.replaceRange(lastIndex, lastIndex + from.length, to);
+}

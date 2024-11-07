@@ -38,6 +38,11 @@ class MigratorRunner extends CommandRunner<Map<Uri, String>> {
           help: 'A path to use when resolving imports.\n'
               'May be passed multiple times.',
           splitCommas: false)
+      ..addOption('aliases',
+          help: 'Path aliases which will be used to look for files.\n'
+              'Should be formatted as JSON, e.g.: --aliases=\'{"@/*": "./src/*"}\'\n'
+              'will redirect all imports starting with "@/" to "./src/" relative\n'
+              'to the current working directory.')
       ..addFlag('migrate-deps',
           abbr: 'd',
           help: 'Migrate dependencies in addition to entrypoints.',
