@@ -15,11 +15,20 @@ class AliasedImporter extends Importer {
         aliases = aliases,
         _filesystemImporter = FilesystemImporter(loadPath);
 
+  /// An importer that resolves URLs starting with alias prefixes by
+  /// searching in the associated path directories. Returns the first
+  /// matching alias.
+  ///
+  /// This helps migrate codebases heavily reliant on path aliasing,
+  /// e.g. next.js codebases with aliases taken from tsconfig.json.
+  ///
+  /// This method iterates through the [aliases] map and checks if the
+  /// [url] starts with any of the keys. If a match is found, it replaces
+  /// the key with the corresponding value and returns the modified URL.
+  /// If no match is found, the original [url] is returned.
   Uri pathAfterReplacement(Uri url) {
     var cleanedAliases = aliases.map((key, value) =>
         MapEntry(replaceLast(key, "*", ""), replaceLast(value, "*", "")));
-
-    print(cleanedAliases);
 
     for (var entry in cleanedAliases.entries) {
       if (url.toString().startsWith(entry.key)) {
@@ -27,7 +36,6 @@ class AliasedImporter extends Importer {
             p.fromUri(url).replaceFirst(entry.key, entry.value);
         var result =
             p.join(p.fromUri(_loadPath), p.normalize(afterReplacement));
-        print(result);
         return p.toUri(result);
       }
     }
@@ -35,11 +43,14 @@ class AliasedImporter extends Importer {
     return url;
   }
 
+  /// This method first processes the [url] through the alias replacement
+  /// method to apply alias replacements, and then it canonalizes
+  /// the given [url] using the [FilesystemImporter].
   Uri? canonicalize(Uri url) {
     return _filesystemImporter.canonicalize(pathAfterReplacement(url));
   }
 
-  /// Loads [url] using a [FilesystemImporter].
+  /// Loads the specified [url] using a [FilesystemImporter].
   ///
   /// [url] must be the canonical URL returned by [canonicalize].
   ImporterResult? load(Uri url) => _filesystemImporter.load(url);

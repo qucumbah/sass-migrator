@@ -127,6 +127,11 @@ abstract class Migrator extends Command<Map<Uri, String>> {
     }
   }
 
+  /// Retrieves a list of [Importer] instances used for resolving imports.
+  ///
+  /// This method constructs a list of importers, starting with a [NodeModulesImporter]
+  /// initialized with the current base directory. If any aliases are provided, they are
+  /// parsed and an [AliasedImporter] is created and added to the list.
   List<Importer> _getImporters() {
     var baseDirectory = p.current;
 
